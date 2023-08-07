@@ -1,0 +1,10 @@
+server:
+  host: 127.0.0.1
+  port: 8888
+  name: KingNet
+  Version: 1.0.0
+  max-packet-size: 4096
+  max-connections: 12000
+  worker-pool-size: 10
+  max-worker-task-length: 1024
+  max-message-channel-length: 10
