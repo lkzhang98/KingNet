@@ -1,9 +1,9 @@
 package knet
 
 import (
-	"KingNet/internal/kingnet/iface"
-	"KingNet/internal/pkg/log"
 	"fmt"
+	"go.mod/internal/kingnet/iface"
+	"go.mod/internal/pkg/log"
 	"net"
 	"time"
 )
@@ -55,19 +55,21 @@ func (s *Server) Start() {
 		cid = 0
 		//3 start the tcp listener
 		for {
-			conn, err := listener.AcceptTCP()
+			connection, err := listener.AcceptTCP()
 			if err != nil {
-				log.Errorf("[ERROR] listener failed to accept TCP connection: %s, remote addr: %s", err.Error(), conn.RemoteAddr().String())
+				log.Errorf("[ERROR] listener failed to accept TCP connection: %s, remote addr: %s", err.Error(), connection.RemoteAddr().String())
 				continue
 			}
 
-			if s.ConnMgr.Len() >= utils.GlobalObject.MaxConn {
-				conn.Close()
+			if s.ConnMgr.Len() >= ServerOption.MaxConnections {
+				connection.Close()
 				continue
 			}
 
-			//3.3 处理该新连接请求的 业务 方法， 此时应该有 handler 和 conn是绑定的
-			dealConn := NewConnection(s, conn, cid, s.msgHandler)
+			//
+
+			log.Infof("[INFO] server accepted connection from :%s with connection id %d", connection.RemoteAddr().String(), cid)
+			dealConn := NewConnection(s, connection, cid, s.msgHandler)
 			cid++
 
 			//3.4 启动当前链接的处理业务
@@ -78,7 +80,7 @@ func (s *Server) Start() {
 }
 
 func (s *Server) Stop() {
-	fmt.Println("[STOP] Zinx server , name ", s.Name)
+	log.Infof("[STOP] Zinx server , name ", s.Name)
 
 	//将其他需要清理的连接信息或者其他信息 也要一并停止或者清理
 	s.ConnMgr.ClearConn()
@@ -96,10 +98,10 @@ func (s *Server) Serve() {
 func NewServer() *Server {
 
 	return &Server{
-		Name:       utils.GlobalObject.Name, //从全局参数获取
+		Name:       ServerOption.Name, //从全局参数获取
 		IPVersion:  "tcp4",
-		IP:         utils.GlobalObject.Host,    //从全局参数获取
-		Port:       utils.GlobalObject.TcpPort, //从全局参数获取
+		IP:         ServerOption.Host,    //从全局参数获取
+		Port:       ServerOption.TcpPort, //从全局参数获取
 		msgHandler: NewMsgHandle(),
 		ConnMgr:    NewConnManager(),
 	}
@@ -123,7 +125,7 @@ func (s *Server) SetOnConnStop(hookFunc func(iface.ConnectionI)) {
 // CallOnConnStart Hook
 func (s *Server) CallOnConnStart(conn iface.ConnectionI) {
 	if s.OnConnStart != nil {
-		fmt.Println("---> CallOnConnStart....")
+		log.Info("---> CallOnConnStart....")
 		s.OnConnStart(conn)
 	}
 }
@@ -131,7 +133,12 @@ func (s *Server) CallOnConnStart(conn iface.ConnectionI) {
 // CallOnConnStop Hook
 func (s *Server) CallOnConnStop(conn iface.ConnectionI) {
 	if s.OnConnStop != nil {
-		fmt.Println("---> CallOnConnStop....")
+		log.Info("---> CallOnConnStop....")
 		s.OnConnStop(conn)
 	}
+}
+
+// AddRouter adds a router to the server
+func (s *Server) AddRouter(msgId uint32, router iface.RouterI) {
+	s.msgHandler.AddRouter(msgId, router)
 }
