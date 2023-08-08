@@ -20,7 +20,7 @@ type Server struct {
 	// Port is the port of the server listening on
 	Port int
 	// msgHandler defines the server how to handle messages
-	msgHandler iface.MsgHandleI
+	msgHandler iface.MsgHandlerI
 	// ConnMgr defines the connection manager
 	ConnMgr iface.ConnManagerI
 
@@ -50,7 +50,7 @@ func (s *Server) Start() {
 			log.Errorf("[ERROR] failed to listen on TCP address: %s", err.Error())
 			return
 		}
-		log.Infof("[SUCCESS] server start successfully at %s:%d.", s.IP, s.Port)
+		log.Infof("[SUCCESS] server start successfully at %s: %d.", s.IP, s.Port)
 		var cid uint32
 		cid = 0
 		//3 start the tcp listener
@@ -60,19 +60,17 @@ func (s *Server) Start() {
 				log.Errorf("[ERROR] listener failed to accept TCP connection: %s, remote addr: %s", err.Error(), connection.RemoteAddr().String())
 				continue
 			}
-
+			// the number of connections is over the maximum number of connections, decline the connection
 			if s.ConnMgr.Len() >= ServerOption.MaxConnections {
 				connection.Close()
 				continue
 			}
 
-			//
-
 			log.Infof("[INFO] server accepted connection from :%s with connection id %d", connection.RemoteAddr().String(), cid)
 			dealConn := NewConnection(s, connection, cid, s.msgHandler)
 			cid++
 
-			//3.4 启动当前链接的处理业务
+			//4 start the connection handler
 			go dealConn.Start()
 		}
 	}()
@@ -82,7 +80,6 @@ func (s *Server) Start() {
 func (s *Server) Stop() {
 	log.Infof("[STOP] Zinx server , name ", s.Name)
 
-	//将其他需要清理的连接信息或者其他信息 也要一并停止或者清理
 	s.ConnMgr.ClearConn()
 
 }
@@ -98,11 +95,11 @@ func (s *Server) Serve() {
 func NewServer() *Server {
 
 	return &Server{
-		Name:       ServerOption.Name, //从全局参数获取
+		Name:       ServerOption.Name,
 		IPVersion:  "tcp4",
-		IP:         ServerOption.Host,    //从全局参数获取
-		Port:       ServerOption.TcpPort, //从全局参数获取
-		msgHandler: NewMsgHandle(),
+		IP:         ServerOption.Host,
+		Port:       ServerOption.TcpPort,
+		msgHandler: NewMsgHandler(),
 		ConnMgr:    NewConnManager(),
 	}
 }

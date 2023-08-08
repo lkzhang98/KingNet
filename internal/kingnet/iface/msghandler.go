@@ -1,6 +1,6 @@
 package iface
 
-type MsgHandleI interface {
+type MsgHandlerI interface {
 	// DoMsgHandler handles a message
 	DoMsgHandler(request RequestI)
 	// AddRouter add router

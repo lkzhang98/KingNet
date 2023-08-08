@@ -17,6 +17,8 @@ var (
 	defaultConfigName = "kingnet.yaml"
 )
 
+var prefix string
+
 func initConfig() {
 	if cfgFile != "" {
 		// 从命令行选项指定的配置文件中读取
@@ -53,6 +55,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Errorw("Failed to read viper configuration file", "err", err)
 	}
+	prefix = viper.GetString("runmode") + "."
 
 	// 打印 viper 当前使用的配置文件，方便 Debug.
 	log.Debugw("Using config file", "file", viper.ConfigFileUsed())
@@ -60,25 +63,27 @@ func initConfig() {
 }
 
 func logOptions() *log.Options {
+
 	return &log.Options{
-		DisableCaller:     viper.GetBool("log.disable-caller"),
-		DisableStacktrace: viper.GetBool("log.disable-stacktrace"),
-		Level:             viper.GetString("log.level"),
-		Format:            viper.GetString("log.format"),
-		OutputPaths:       viper.GetStringSlice("log.output-paths"),
+		DisableCaller:     viper.GetBool(prefix + "log.disable-caller"),
+		DisableStacktrace: viper.GetBool(prefix + "log.disable-stacktrace"),
+		Level:             viper.GetString(prefix + "log.level"),
+		Format:            viper.GetString(prefix + "log.format"),
+		OutputPaths:       viper.GetStringSlice(prefix + "log.output-paths"),
 	}
 }
 
 func serverOptions() *knet.Options {
+
 	return &knet.Options{
-		Host:             viper.GetString("server.host"),
-		TcpPort:          viper.GetInt("server.port"),
-		Name:             viper.GetString("server.name"),
-		Version:          viper.GetString("server.version"),
-		MaxPacketSize:    viper.GetUint32("server.max-packet-size"),
-		MaxConnections:   viper.GetInt("server.max-connections"),
-		WorkerPoolSize:   viper.GetUint32("server.worker-pool-size"),
-		MaxWorkerTaskLen: viper.GetUint32("server.max-worker-task-length"),
-		MaxMsgChanLen:    viper.GetUint32("server.max-message-channel-length"),
+		Host:             viper.GetString(prefix + "server.host"),
+		TcpPort:          viper.GetInt(prefix + "server.port"),
+		Name:             viper.GetString(prefix + "server.name"),
+		Version:          viper.GetString(prefix + "server.version"),
+		MaxPacketSize:    viper.GetUint32(prefix + "server.max-packet-size"),
+		MaxConnections:   viper.GetInt(prefix + "server.max-connections"),
+		WorkerPoolSize:   viper.GetUint32(prefix + "server.worker-pool-size"),
+		MaxWorkerTaskLen: viper.GetUint32(prefix + "server.max-worker-task-length"),
+		MaxMsgChanLen:    viper.GetUint32(prefix + "server.max-message-channel-length"),
 	}
 }

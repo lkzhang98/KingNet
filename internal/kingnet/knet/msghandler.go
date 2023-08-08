@@ -6,22 +6,25 @@ import (
 	"strconv"
 )
 
-type MsgHandle struct {
+// MsgHandler
+type MsgHandler struct {
 	Apis           map[uint32]iface.RouterI
 	WorkerPoolSize uint32
 	TaskQueue      []chan iface.RequestI //存放每个MsgId 所对应的处理方法的map属性
 }
 
-func NewMsgHandle() *MsgHandle {
-	return &MsgHandle{
+func NewMsgHandler() *MsgHandler {
+	return &MsgHandler{
 		Apis:           make(map[uint32]iface.RouterI),
 		WorkerPoolSize: ServerOption.WorkerPoolSize,
 		TaskQueue:      make([]chan iface.RequestI, ServerOption.MaxWorkerTaskLen),
 	}
 }
 
-// 马上以非阻塞方式处理消息
-func (mh *MsgHandle) DoMsgHandler(request iface.RequestI) {
+var _ iface.MsgHandlerI = &MsgHandler{}
+
+// DoMsgHandler 马上以非阻塞方式处理消息
+func (mh *MsgHandler) DoMsgHandler(request iface.RequestI) {
 	handler, ok := mh.Apis[request.GetMsgID()]
 	if !ok {
 		fmt.Println("api msgId = ", request.GetMsgID(), " is not FOUND!")
@@ -34,8 +37,8 @@ func (mh *MsgHandle) DoMsgHandler(request iface.RequestI) {
 	handler.PostHandle(request)
 }
 
-// 为消息添加具体的处理逻辑
-func (mh *MsgHandle) AddRouter(msgId uint32, router iface.RouterI) {
+// AddRouter 为消息添加具体的处理逻辑
+func (mh *MsgHandler) AddRouter(msgId uint32, router iface.RouterI) {
 	//1 判断当前msg绑定的API处理方法是否已经存在
 	if _, ok := mh.Apis[msgId]; ok {
 		panic("repeated api , msgId = " + strconv.Itoa(int(msgId)))
@@ -45,7 +48,8 @@ func (mh *MsgHandle) AddRouter(msgId uint32, router iface.RouterI) {
 	fmt.Println("Add api msgId = ", msgId)
 }
 
-func (mh *MsgHandle) StartOneWorker(workerID int, taskQueue chan iface.RequestI) {
+// StartOneWorker 开启一个worker工作
+func (mh *MsgHandler) StartOneWorker(workerID int, taskQueue chan iface.RequestI) {
 	fmt.Println("Worker ID = ", workerID, " is started.")
 	//不断的等待队列中的消息
 	for {
@@ -57,8 +61,8 @@ func (mh *MsgHandle) StartOneWorker(workerID int, taskQueue chan iface.RequestI)
 	}
 }
 
-// 启动worker工作池
-func (mh *MsgHandle) StartWorkerPool() {
+// StartWorkerPool 启动worker工作池
+func (mh *MsgHandler) StartWorkerPool() {
 	//遍历需要启动worker的数量，依此启动
 	for i := 0; i < int(mh.WorkerPoolSize); i++ {
 		//一个worker被启动
@@ -69,7 +73,8 @@ func (mh *MsgHandle) StartWorkerPool() {
 	}
 }
 
-func (mh *MsgHandle) SendMsgToTaskQueue(request iface.RequestI) {
+// SendMsgToTaskQueue 向任务队列中发送消息
+func (mh *MsgHandler) SendMsgToTaskQueue(request iface.RequestI) {
 	//根据ConnID来分配当前的连接应该由哪个worker负责处理
 	//轮询的平均分配法则
 

@@ -1,18 +1,21 @@
-//TODO: 修改注释
-server:
-  host: 127.0.0.1
-  port: 8888
-  name: KingNet
-  version: 1.0.0
-  max-packet-size: 4096
-  max-connections: 12000
-  worker-pool-size: 10
-  max-worker-task-length: 1024
-  max-message-channel-length: 10
+# 定义开发时的配置信息
+runmode: dev
+dev:
+  # 定义server的配置信息
+  server:
+    host: 127.0.0.1
+    port: 8888
+    name: KingNet
+    version: 1.0.0
+    max-packet-size: 4096
+    max-connections: 12000
+    worker-pool-size: 10
+    max-worker-task-length: 1024
+    max-message-channel-length: 10
 
-log:
-  disable-caller: false # 是否开启 caller，如果开启会在日志中显示调用日志所在的文件和行号
-  disable-stacktrace: false # 是否禁止在 panic 及以上级别打印堆栈信息
-  level: debug # 指定日志级别，可选值：debug, info, warn, error, dpanic, panic, fatal
-  format: console # 指定日志显示格式，可选值：console, json
-  output-paths: [/tmp/kingnet.log, stdout] # 指定日志输出位置，多个输出，用 `逗号 + 空格` 分开。stdout：标准输出，
+  log:
+    disable-caller: false # 是否开启 caller，如果开启会在日志中显示调用日志所在的文件和行号
+    disable-stacktrace: false # 是否禁止在 panic 及以上级别打印堆栈信息
+    level: debug # 指定日志级别，可选值：debug, info, warn, error, panic, fatal
+    format: console # 指定日志显示格式，可选值：console, json
+    output-paths: [/tmp/kingnet.log, stdout] # 指定日志输出位置，多个输出，用 `逗号 + 空格` 分开。stdout：标准输出，

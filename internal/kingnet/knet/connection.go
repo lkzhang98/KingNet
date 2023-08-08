@@ -1,7 +1,6 @@
 package knet
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"go.mod/internal/kingnet/iface"
 	"go.mod/internal/pkg/log"
@@ -10,17 +9,18 @@ import (
 	"sync"
 )
 
+// Connection 用来处理连接
 type Connection struct {
 	TcpServer iface.ServerI
-	//当前连接的socket TCP套接字
+	//Conn 当前连接的socket TCP套接字
 	Conn *net.TCPConn
-	//当前连接的ID 也可以称作为SessionID，ID全局唯一
+	//ConnID 当前连接的ID 也可以称作为SessionID，ID全局唯一
 	ConnID uint32
-	//当前连接的关闭状态
+	//isClosed 当前连接的关闭状态
 	isClosed bool
 
 	//该连接的处理方法api
-	MsgHandler iface.MsgHandleI
+	MsgHandler iface.MsgHandlerI
 
 	//告知该链接已经退出/停止的channel
 	ExitBuffChan chan bool
@@ -33,12 +33,11 @@ type Connection struct {
 	property map[string]interface{}
 	//保护链接属性修改的锁
 	propertyLock sync.RWMutex
-	// ================================
 }
 
-func NewConnection(server iface.ServerI, conn *net.TCPConn, connID uint32, msgHandler iface.MsgHandleI) *Connection {
+func NewConnection(server iface.ServerI, conn *net.TCPConn, connID uint32, msgHandler iface.MsgHandlerI) *Connection {
 	c := &Connection{
-		TcpServer:    server, //将隶属的server传递进来
+		TcpServer:    server,
 		Conn:         conn,
 		ConnID:       connID,
 		isClosed:     false,
@@ -48,16 +47,17 @@ func NewConnection(server iface.ServerI, conn *net.TCPConn, connID uint32, msgHa
 		msgBuffChan:  make(chan []byte, ServerOption.MaxMsgChanLen),
 		property:     make(map[string]interface{}),
 	}
-
 	//将新创建的Conn添加到链接管理中
-	c.TcpServer.GetConnMgr().Add(c) //将当前新创建的连接添加到ConnManager中
+	c.TcpServer.GetConnMgr().Add(c)
 	return c
 }
 
-/* 处理conn读数据的Goroutine */
+var _ iface.ConnectionI = &Connection{}
+
+// StartReader 处理conn读数据的Goroutine
 func (c *Connection) StartReader() {
 	log.Debug("Reader Goroutine is running")
-	defer fmt.Println(c.RemoteAddr().String(), " conn reader exit!")
+	defer log.Debug(c.RemoteAddr().String(), " conn reader exit!")
 	defer c.Stop()
 
 	for {
@@ -95,7 +95,7 @@ func (c *Connection) StartReader() {
 		//得到当前客户端请求的Request数据
 		req := Request{
 			conn: c,
-			msg:  msg, //将之前的buf 改成 msg
+			msg:  msg,
 		}
 		//从路由Routers 中找到注册绑定Conn的对应Handle
 		if ServerOption.WorkerPoolSize > 0 {
@@ -108,7 +108,7 @@ func (c *Connection) StartReader() {
 	}
 }
 
-// 启动连接，让当前连接开始工作
+// Start 启动连接，让当前连接开始工作
 func (c *Connection) Start() {
 
 	//开启处理该链接读取到客户端数据之后的请求业务
@@ -127,7 +127,7 @@ func (c *Connection) Start() {
 	}
 }
 
-// 停止连接，结束当前连接状态M
+// Stop 停止连接，结束当前连接状态M
 func (c *Connection) Stop() {
 	log.Infof("Conn Stop()...ConnID = ", c.ConnID)
 	//如果当前链接已经关闭
@@ -154,21 +154,22 @@ func (c *Connection) Stop() {
 	close(c.msgBuffChan)
 }
 
-// 从当前连接获取原始的socket TCPConn
+// GetTCPConnection 从当前连接获取原始的socket TCPConn
 func (c *Connection) GetTCPConnection() *net.TCPConn {
 	return c.Conn
 }
 
-// 获取当前连接ID
+// GetConnID 获取当前连接ID
 func (c *Connection) GetConnID() uint32 {
 	return c.ConnID
 }
 
-// 获取远程客户端地址信息
+// RemoteAddr 获取远程客户端地址信息
 func (c *Connection) RemoteAddr() net.Addr {
 	return c.Conn.RemoteAddr()
 }
 
+// SendMsg 发送不带缓冲的信息
 func (c *Connection) SendMsg(msgId uint32, data []byte) error {
 	if c.isClosed == true {
 		return errors.New("Connection closed when send msg")
@@ -180,13 +181,14 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) error {
 		log.Errorf("Pack error msg id = , Connection Id = ", msgId, c.ConnID)
 		return errors.New("Pack error msg ")
 	}
-
 	//写回客户端
-	c.msgChan <- msg //将之前直接回写给conn.Write的方法 改为 发送给Channel 供Writer读取
+	//将之前直接回写给conn.Write的方法 改为 发送给Channel 供Writer读取
+	c.msgChan <- msg
 
 	return nil
 }
 
+// SendBuffMsg 发送带有缓存的消息
 func (c *Connection) SendBuffMsg(msgId uint32, data []byte) error {
 	if c.isClosed == true {
 		return errors.New("Connection closed when send buff msg")
@@ -205,9 +207,7 @@ func (c *Connection) SendBuffMsg(msgId uint32, data []byte) error {
 	return nil
 }
 
-/*
-写消息Goroutine， 用户将数据发送给客户端
-*/
+// StartWriter 将消息写回客户端
 func (c *Connection) StartWriter() {
 	log.Info("[Writer Goroutine is running]")
 	defer log.Info(c.RemoteAddr().String(), "[conn Writer exit!]")
@@ -229,8 +229,8 @@ func (c *Connection) StartWriter() {
 					return
 				}
 			} else {
-				break
 				log.Errorf("msgBuffChan is Closed, Connection Id = %d", c.ConnID)
+				break
 			}
 		case <-c.ExitBuffChan:
 			return
@@ -238,6 +238,7 @@ func (c *Connection) StartWriter() {
 	}
 }
 
+// SetProperty 为当前连接添加属性
 func (c *Connection) SetProperty(key string, value interface{}) {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
@@ -245,7 +246,7 @@ func (c *Connection) SetProperty(key string, value interface{}) {
 	c.property[key] = value
 }
 
-// 获取链接属性
+// GetProperty 获取链接属性
 func (c *Connection) GetProperty(key string) (interface{}, error) {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
@@ -257,7 +258,7 @@ func (c *Connection) GetProperty(key string) (interface{}, error) {
 	}
 }
 
-// 移除链接属性
+// RemoveProperty 移除链接属性
 func (c *Connection) RemoveProperty(key string) {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()

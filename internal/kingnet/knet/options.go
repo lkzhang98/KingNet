@@ -4,17 +4,18 @@ var (
 	ServerOption *Options
 )
 
+// Options 存放knet的配置
 type Options struct {
-	Host    string
-	TcpPort int
-	Name    string
-	Version string
+	Host    string // 监听的地址
+	TcpPort int    // 监听的端口
+	Name    string // 应用名称
+	Version string // 版本信息
 
-	MaxPacketSize    uint32
-	MaxConnections   int
-	WorkerPoolSize   uint32
-	MaxWorkerTaskLen uint32
-	MaxMsgChanLen    uint32
+	MaxPacketSize    uint32 // 接受包的最大尺寸
+	MaxConnections   int    // 最大连接数
+	WorkerPoolSize   uint32 // 工作池的最大数
+	MaxWorkerTaskLen uint32 // 每个worker的最大任务数
+	MaxMsgChanLen    uint32 // 最大的消息channel的长度
 }
 
 func NewServerOptions() *Options {

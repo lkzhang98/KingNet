@@ -4,29 +4,26 @@ import (
 	"bytes"
 	"encoding/binary"
 	"github.com/pkg/errors"
+	"go.mod/internal/kingnet/iface"
 )
-
-type DataPackI interface {
-	GetHeadLen() uint32                //获取包头长度方法
-	Pack(msg MessageI) ([]byte, error) //封包方法
-	Unpack([]byte) (MessageI, error)   //拆包方法
-}
 
 type DataPack struct{}
 
-// 封包拆包实例初始化方法
+var _ iface.DataPackI = &DataPack{}
+
+// NewDataPack 封包拆包实例初始化方法
 func NewDataPack() *DataPack {
 	return &DataPack{}
 }
 
-// 获取包头长度方法
+// GetHeadLen 获取包头长度方法
 func (dp *DataPack) GetHeadLen() uint32 {
 	//Id uint32(4字节) +  DataLen uint32(4字节)
 	return 8
 }
 
-// 封包方法(压缩数据)
-func (dp *DataPack) Pack(msg MessageI) ([]byte, error) {
+// Pack 封包方法(压缩数据)
+func (dp *DataPack) Pack(msg iface.MessageI) ([]byte, error) {
 	//创建一个存放bytes字节的缓冲
 	dataBuff := bytes.NewBuffer([]byte{})
 
@@ -48,8 +45,8 @@ func (dp *DataPack) Pack(msg MessageI) ([]byte, error) {
 	return dataBuff.Bytes(), nil
 }
 
-// 拆包方法(解压数据)
-func (dp *DataPack) Unpack(binaryData []byte) (MessageI, error) {
+// Unpack 拆包方法(解压数据)
+func (dp *DataPack) Unpack(binaryData []byte) (iface.MessageI, error) {
 	//创建一个从输入二进制数据的ioReader
 	dataBuff := bytes.NewReader(binaryData)
 

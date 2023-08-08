@@ -8,6 +8,7 @@ import (
 	"sync"
 )
 
+// ConnManager 连接管理器
 type ConnManager struct {
 	connections map[uint32]iface.ConnectionI //管理的连接信息
 	connLock    sync.RWMutex                 //读写连接的读写锁
@@ -19,7 +20,9 @@ func NewConnManager() *ConnManager {
 	}
 }
 
-// 添加链接
+var _ iface.ConnManagerI = &ConnManager{}
+
+// Add 添加链接
 func (connMgr *ConnManager) Add(conn iface.ConnectionI) {
 	//保护共享资源Map 加写锁
 	connMgr.connLock.Lock()
@@ -31,7 +34,7 @@ func (connMgr *ConnManager) Add(conn iface.ConnectionI) {
 	log.Infof("connection add to ConnManager successfully: conn num = ", connMgr.Len())
 }
 
-// 删除连接
+// Remove 删除连接
 func (connMgr *ConnManager) Remove(conn iface.ConnectionI) {
 	//保护共享资源Map 加写锁
 	connMgr.connLock.Lock()
@@ -43,7 +46,7 @@ func (connMgr *ConnManager) Remove(conn iface.ConnectionI) {
 	fmt.Println("connection Remove ConnID=", conn.GetConnID(), " successfully: conn num = ", connMgr.Len())
 }
 
-// 利用ConnID获取链接
+// Get 利用ConnID获取链接
 func (connMgr *ConnManager) Get(connID uint32) (iface.ConnectionI, error) {
 	//保护共享资源Map 加读锁
 	connMgr.connLock.RLock()
@@ -56,12 +59,12 @@ func (connMgr *ConnManager) Get(connID uint32) (iface.ConnectionI, error) {
 	}
 }
 
-// 获取当前连接
+// Len 获取当前连接
 func (connMgr *ConnManager) Len() int {
 	return len(connMgr.connections)
 }
 
-// 清除并停止所有连接
+// ClearConn 清除并停止所有连接
 func (connMgr *ConnManager) ClearConn() {
 	//保护共享资源Map 加写锁
 	connMgr.connLock.Lock()
@@ -69,11 +72,11 @@ func (connMgr *ConnManager) ClearConn() {
 
 	//停止并删除全部的连接信息
 	for connID, conn := range connMgr.connections {
-		//停止
+		//停止连接
 		conn.Stop()
-		//删除
+		//删除连接
 		delete(connMgr.connections, connID)
 	}
 
-	fmt.Println("Clear All Connections successfully: conn num = ", connMgr.Len())
+	log.Infof("Clear All Connections successfully: conn num = %d", connMgr.Len())
 }
