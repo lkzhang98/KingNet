@@ -49,11 +49,11 @@ func run() error {
 	s.SetOnConnStart(knet.DoConnectionBegin)
 	s.SetOnConnStop(knet.DoConnectionLost)
 
-	//配置路由
+	// 配置路由
 	s.AddRouter(0, &PingRouter{})
 	s.AddRouter(1, &HelloKingNetRouter{})
 
-	//开启服务
+	// 开启服务
 	s.Serve()
 	// 等待中断信号优雅地关闭服务器（10 秒超时)。
 	quit := make(chan os.Signal, 1)

@@ -5,7 +5,7 @@ import (
 	"go.mod/internal/pkg/log"
 )
 
-// DoConnectionBegin 连接开始的时候执行
+// DoConnectionBegin 连接开始的时候执行.
 func DoConnectionBegin(conn iface.ConnectionI) {
 	log.Info("DoConnectionBegin is Called ... ")
 	err := conn.SendMsg(2, []byte("DoConnection BEGIN..."))
@@ -14,7 +14,7 @@ func DoConnectionBegin(conn iface.ConnectionI) {
 	}
 }
 
-// DoConnectionLost 连接断开的时候执行
+// DoConnectionLost 连接断开的时候执行.
 func DoConnectionLost(conn iface.ConnectionI) {
 	log.Info("DoConnectionLost is Called ... ")
 }

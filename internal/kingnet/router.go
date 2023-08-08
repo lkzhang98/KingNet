@@ -12,7 +12,7 @@ type PingRouter struct {
 
 func (this *PingRouter) Handle(request iface.RequestI) {
 	log.Debug("Call PingRouter Handle")
-	//先读取客户端的数据，再回写ping...ping...ping
+	// 先读取客户端的数据，再回写ping...ping...ping
 	log.Debugf("recv from client : msgId=", request.GetMsgID(), ", data=", string(request.GetData()))
 
 	err := request.GetConnection().SendBuffMsg(0, []byte("ping...ping...ping"))
@@ -27,7 +27,7 @@ type HelloKingNetRouter struct {
 
 func (h *HelloKingNetRouter) Handle(request iface.RequestI) {
 	log.Debug("Call HelloKingNetRouter Handle")
-	//先读取客户端的数据，再回写ping...ping...ping
+	// 先读取客户端的数据，再回写ping...ping...ping
 	log.Debugf("recv from client : msgId=", request.GetMsgID(), ", data=", string(request.GetData()))
 
 	err := request.GetConnection().SendBuffMsg(1, []byte("Hello KingNet Router V0.8"))

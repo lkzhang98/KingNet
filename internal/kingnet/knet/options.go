@@ -1,10 +1,8 @@
 package knet
 
-var (
-	ServerOption *Options
-)
+var ServerOption *Options
 
-// Options 存放knet的配置
+// Options 存放knet的配置.
 type Options struct {
 	Host    string // 监听的地址
 	TcpPort int    // 监听的端口

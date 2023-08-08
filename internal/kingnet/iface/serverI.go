@@ -1,7 +1,6 @@
 package iface
 
 type ServerI interface {
-
 	// Start starts the server
 	Start()
 	// Stop stops the server

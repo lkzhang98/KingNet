@@ -1,13 +1,14 @@
 package kingnet
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.mod/internal/kingnet/knet"
 	"go.mod/internal/pkg/log"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 var (
@@ -59,11 +60,9 @@ func initConfig() {
 
 	// 打印 viper 当前使用的配置文件，方便 Debug.
 	log.Debugw("Using config file", "file", viper.ConfigFileUsed())
-
 }
 
 func logOptions() *log.Options {
-
 	return &log.Options{
 		DisableCaller:     viper.GetBool(prefix + "log.disable-caller"),
 		DisableStacktrace: viper.GetBool(prefix + "log.disable-stacktrace"),
@@ -74,7 +73,6 @@ func logOptions() *log.Options {
 }
 
 func serverOptions() *knet.Options {
-
 	return &knet.Options{
 		Host:             viper.GetString(prefix + "server.host"),
 		TcpPort:          viper.GetInt(prefix + "server.port"),

@@ -9,7 +9,7 @@ import (
 )
 
 // Server implements the ServerI interface
-// It is the main entry point for the KingNet server
+// It is the main entry point for the KingNet server.
 type Server struct {
 	// Name is the name of the server
 	Name string
@@ -37,23 +37,22 @@ func (s *Server) Start() {
 	go func() {
 		s.msgHandler.StartWorkerPool()
 
-		//1 get the addr from the server
+		// 1 get the addr from the server
 		addr, err := net.ResolveTCPAddr(s.IPVersion, fmt.Sprintf("%s:%d", s.IP, s.Port))
 		if err != nil {
 			log.Errorf("[ERROR] failed to resolve TCP address: %s", err.Error())
 			return
 		}
 
-		//2 listener the tcp port
+		// 2 listener the tcp port
 		listener, err := net.ListenTCP(s.IPVersion, addr)
 		if err != nil {
 			log.Errorf("[ERROR] failed to listen on TCP address: %s", err.Error())
 			return
 		}
 		log.Infof("[SUCCESS] server start successfully at %s: %d.", s.IP, s.Port)
-		var cid uint32
-		cid = 0
-		//3 start the tcp listener
+		var cid uint32 = 0
+		// 3 start the tcp listener
 		for {
 			connection, err := listener.AcceptTCP()
 			if err != nil {
@@ -70,18 +69,16 @@ func (s *Server) Start() {
 			dealConn := NewConnection(s, connection, cid, s.msgHandler)
 			cid++
 
-			//4 start the connection handler
+			// 4 start the connection handler
 			go dealConn.Start()
 		}
 	}()
-
 }
 
 func (s *Server) Stop() {
 	log.Infof("[STOP] Zinx server , name ", s.Name)
 
 	s.ConnMgr.ClearConn()
-
 }
 
 func (s *Server) Serve() {
@@ -93,7 +90,6 @@ func (s *Server) Serve() {
 }
 
 func NewServer() *Server {
-
 	return &Server{
 		Name:       ServerOption.Name,
 		IPVersion:  "tcp4",
@@ -104,22 +100,22 @@ func NewServer() *Server {
 	}
 }
 
-// GetConnMgr returns the connection manager of the server
+// GetConnMgr returns the connection manager of the server.
 func (s *Server) GetConnMgr() iface.ConnManagerI {
 	return s.ConnMgr
 }
 
-// SetOnConnStart sets the OnConnStart hook function
+// SetOnConnStart sets the OnConnStart hook function.
 func (s *Server) SetOnConnStart(hookFunc func(iface.ConnectionI)) {
 	s.OnConnStart = hookFunc
 }
 
-// SetOnConnStop sets the OnConnStop hook function
+// SetOnConnStop sets the OnConnStop hook function.
 func (s *Server) SetOnConnStop(hookFunc func(iface.ConnectionI)) {
 	s.OnConnStop = hookFunc
 }
 
-// CallOnConnStart Hook
+// CallOnConnStart Hook.
 func (s *Server) CallOnConnStart(conn iface.ConnectionI) {
 	if s.OnConnStart != nil {
 		log.Info("---> CallOnConnStart....")
@@ -127,7 +123,7 @@ func (s *Server) CallOnConnStart(conn iface.ConnectionI) {
 	}
 }
 
-// CallOnConnStop Hook
+// CallOnConnStop Hook.
 func (s *Server) CallOnConnStop(conn iface.ConnectionI) {
 	if s.OnConnStop != nil {
 		log.Info("---> CallOnConnStop....")
@@ -135,7 +131,7 @@ func (s *Server) CallOnConnStop(conn iface.ConnectionI) {
 	}
 }
 
-// AddRouter adds a router to the server
+// AddRouter adds a router to the server.
 func (s *Server) AddRouter(msgId uint32, router iface.RouterI) {
 	s.msgHandler.AddRouter(msgId, router)
 }

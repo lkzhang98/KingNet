@@ -36,14 +36,14 @@ type KLogger struct {
 	z *zap.Logger
 }
 
-// Ensure the Klogger implements Logger interface
+// Ensure the Klogger implements Logger interface.
 var _ Logger = &KLogger{}
 
 var (
-	// mu is used to synchronize access to the global logger
+	// mu is used to synchronize access to the global logger.
 	mu sync.Mutex
 
-	// std Logger global variables
+	// std Logger global variables.
 	std = NewLogger(NewOptions())
 )
 
@@ -113,6 +113,7 @@ func Sync() { std.Sync() }
 func (k *KLogger) Sync() {
 	_ = k.z.Sync()
 }
+
 func Debug(msg ...interface{}) {
 	std.z.Sugar().Debug(msg)
 }
@@ -259,6 +260,7 @@ func (k *KLogger) Fatalw(msg string, keysAndValues ...interface{}) {
 
 // clone deep copies the KLogger.
 func (k *KLogger) clone() *KLogger {
+
 	lc := *k
 	return &lc
 }

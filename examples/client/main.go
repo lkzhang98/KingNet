@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-// TODO：修改注释及log方式
 func main() {
 
 	fmt.Println("Client Test ... start")

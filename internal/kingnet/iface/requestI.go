@@ -1,6 +1,6 @@
 package iface
 
-// RequestI defines the method to process requests
+// RequestI defines the method to process requests.
 type RequestI interface {
 	// GetConnection returns the connection
 	GetConnection() ConnectionI
