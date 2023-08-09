@@ -1,12 +1,18 @@
+// Copyright 2022 Innkeeper lkzhang98(张良康) <lkzhang98@163.com>. All rights reserved.
+// Use of this source code is governed by a MIT style
+// license that can be found in the LICENSE file. The original repo for
+// this file is https://github.com/lkzhang98/kingnet.
+
 package knet
 
 import (
 	"errors"
-	"go.mod/internal/kingnet/iface"
-	"go.mod/internal/pkg/log"
 	"io"
 	"net"
 	"sync"
+
+	"KingNet/internal/kingnet/iface"
+	"KingNet/internal/pkg/log"
 )
 
 // Connection 用来处理连接.
@@ -110,8 +116,8 @@ func (c *Connection) StartReader() {
 
 // Start 启动连接，让当前连接开始工作.
 func (c *Connection) Start() {
-	//开启处理该链接读取到客户端数据之后的请求业务
-	//1 开启用户从客户端读取数据流程的Goroutine
+	// 开启处理该链接读取到客户端数据之后的请求业务
+	// 1 开启用户从客户端读取数据流程的Goroutine
 	go c.StartReader()
 	// 2 开启用于写回客户端数据流程的Goroutine
 	go c.StartWriter()
@@ -130,7 +136,7 @@ func (c *Connection) Start() {
 func (c *Connection) Stop() {
 	log.Infof("Conn Stop()...ConnID = ", c.ConnID)
 	// 如果当前链接已经关闭
-	if c.isClosed == true {
+	if c.isClosed {
 		return
 	}
 	c.isClosed = true
@@ -178,7 +184,7 @@ func (c *Connection) SendMsg(msgId uint32, data []byte) error {
 	msg, err := dp.Pack(NewMsgPackage(msgId, data))
 	if err != nil {
 		log.Errorf("Pack error msg id = , Connection Id = ", msgId, c.ConnID)
-		return errors.New("Pack error msg ")
+		return errors.New("pack error msg ")
 	}
 	// 写回客户端
 	// 将之前直接回写给conn.Write的方法 改为 发送给Channel 供Writer读取

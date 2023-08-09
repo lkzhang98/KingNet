@@ -1,11 +1,16 @@
+// Copyright 2022 Innkeeper lkzhang98(张良康) <lkzhang98@163.com>. All rights reserved.
+// Use of this source code is governed by a MIT style
+// license that can be found in the LICENSE file. The original repo for
+// this file is https://github.com/lkzhang98/kingnet.
+
 package knet
 
 import (
 	"bytes"
 	"encoding/binary"
-
 	"errors"
-	"go.mod/internal/kingnet/iface"
+
+	"KingNet/internal/kingnet/iface"
 )
 
 type DataPack struct{}
@@ -66,7 +71,7 @@ func (dp *DataPack) Unpack(binaryData []byte) (iface.MessageI, error) {
 
 	// 判断dataLen的长度是否超出我们允许的最大包长度
 	if msg.DataLen > 4096 {
-		return nil, errors.New("Too large msg data received")
+		return nil, errors.New("too large msg data received")
 	}
 
 	// 这里只需要把head的数据拆包出来就可以了，然后再通过head的长度，再从conn读取一次数据

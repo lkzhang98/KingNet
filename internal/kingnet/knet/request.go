@@ -1,6 +1,11 @@
+// Copyright 2022 Innkeeper lkzhang98(张良康) <lkzhang98@163.com>. All rights reserved.
+// Use of this source code is governed by a MIT style
+// license that can be found in the LICENSE file. The original repo for
+// this file is https://github.com/lkzhang98/kingnet.
+
 package knet
 
-import "go.mod/internal/kingnet/iface"
+import "KingNet/internal/kingnet/iface"
 
 type Request struct {
 	conn iface.ConnectionI // 已经和客户端建立好的 链接

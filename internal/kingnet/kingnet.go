@@ -1,13 +1,21 @@
+// Copyright 2022 Innkeeper lkzhang98(张良康) <lkzhang98@163.com>. All rights reserved.
+// Use of this source code is governed by a MIT style
+// license that can be found in the LICENSE file. The original repo for
+// this file is https://github.com/lkzhang98/kingnet.
+
 package kingnet
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"go.mod/internal/kingnet/knet"
-	"go.mod/internal/pkg/log"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/spf13/cobra"
+
+	"KingNet/internal/kingnet/knet"
+	"KingNet/internal/pkg/log"
+	"KingNet/pkg/version/verflag"
 )
 
 var cfgFile string
@@ -36,10 +44,13 @@ Find more kingnet information at:`,
 		},
 	}
 	cobra.OnInitialize(initConfig)
-	cmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "The path to the miniblog configuration file. Empty string for no configuration file.")
+	cmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "The path to the kingnet configuration file. Empty string for no configuration file.")
 
 	// Cobra 也支持本地标志，本地标志只能在其所绑定的命令上使用
 	cmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	// 添加 --version 标志
+	verflag.AddFlags(cmd.PersistentFlags())
 
 	return cmd
 }

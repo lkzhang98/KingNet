@@ -1,12 +1,18 @@
+// Copyright 2022 Innkeeper lkzhang98(张良康) <lkzhang98@163.com>. All rights reserved.
+// Use of this source code is governed by a MIT style
+// license that can be found in the LICENSE file. The original repo for
+// this file is https://github.com/lkzhang98/kingnet.
+
 package knet
 
 import (
-	"go.mod/internal/kingnet/iface"
-	"go.mod/internal/pkg/log"
 	"strconv"
+
+	"KingNet/internal/kingnet/iface"
+	"KingNet/internal/pkg/log"
 )
 
-// MsgHandler 定义了消息的处理方法
+// MsgHandler 定义了消息的处理方法.
 type MsgHandler struct {
 	Apis           map[uint32]iface.RouterI
 	WorkerPoolSize uint32
